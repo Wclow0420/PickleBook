@@ -15,6 +15,10 @@ import info_icon from './info_icon.svg'
 import upload_icon from './upload_icon.png'
 import stripe_logo from './stripe_logo.png'
 import razorpay_logo from './razorpay_logo.png'
+import home_icon from './home_icon.svg'
+import booking_icon from './booking_icon.svg'
+import plan_icon from './plan_icon.svg'
+import profile_icon from './profile_icon.svg'
 import doc1 from './doc1.png'
 import doc2 from './doc2.png'
 import doc3 from './doc3.png'
@@ -55,7 +59,11 @@ export const assets = {
     dropdown_icon,
     upload_icon,
     stripe_logo,
-    razorpay_logo
+    razorpay_logo,
+    home_icon,
+    booking_icon,
+    plan_icon,
+    profile_icon
 }
 
 export const specialityData = [
