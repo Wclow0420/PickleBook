@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import appointmentModel from "../models/appointmentModel.js";
-import doctorModel from "../models/doctorModel.js";
+import locationModel from "../models/locationModel.js";
 import bcrypt from "bcrypt";
 import validator from "validator";
 import { v2 as cloudinary } from "cloudinary";
@@ -57,15 +57,15 @@ const appointmentCancel = async (req, res) => {
 
 }
 
-// API for adding Doctor
-const addDoctor = async (req, res) => {
+// API for adding location
+const addLocation = async (req, res) => {
 
     try {
 
         const { name, email, password, speciality, about, fees, address } = req.body
         const imageFile = req.file
 
-        // checking for all data to add doctor
+        // checking for all data to add location
         if (!name || !email || !password || !speciality || !about || !fees || !address) {
             return res.json({ success: false, message: "Missing Details" })
         }
@@ -88,7 +88,7 @@ const addDoctor = async (req, res) => {
         const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" })
         const imageUrl = imageUpload.secure_url
 
-        const doctorData = {
+        const locationData = {
             name,
             email,
             image: imageUrl,
@@ -102,9 +102,9 @@ const addDoctor = async (req, res) => {
             date: Date.now()
         }
 
-        const newDoctor = new doctorModel(doctorData)
-        await newDoctor.save()
-        res.json({ success: true, message: 'Doctor Added' })
+        const newLocation = new locationModel(locationData)
+        await newLocation.save()
+        res.json({ success: true, message: 'Location Added' })
 
     } catch (error) {
         console.log(error)
@@ -112,12 +112,12 @@ const addDoctor = async (req, res) => {
     }
 }
 
-// API to get all doctors list for admin panel
-const allDoctors = async (req, res) => {
+// API to get all locations list for admin panel
+const allLocations = async (req, res) => {
     try {
 
-        const doctors = await doctorModel.find({}).select('-password')
-        res.json({ success: true, doctors })
+        const locations = await locationModel.find({}).select('-password')
+        res.json({ success: true, locations })
 
     } catch (error) {
         console.log(error)
@@ -129,12 +129,12 @@ const allDoctors = async (req, res) => {
 const adminDashboard = async (req, res) => {
     try {
 
-        const doctors = await doctorModel.find({})
+        const locations = await locationModel.find({})
         const users = await userModel.find({})
         const appointments = await appointmentModel.find({})
 
         const dashData = {
-            doctors: doctors.length,
+            locations: locations.length,
             appointments: appointments.length,
             patients: users.length,
             latestAppointments: appointments.reverse()
@@ -152,7 +152,7 @@ export {
     loginAdmin,
     appointmentsAdmin,
     appointmentCancel,
-    addDoctor,
-    allDoctors,
+    addLocation,
+    allLocations,
     adminDashboard
 }

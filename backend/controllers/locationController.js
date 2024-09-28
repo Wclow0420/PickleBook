@@ -1,15 +1,15 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import doctorModel from "../models/doctorModel.js";
+import locationModel from "../models/locationModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 
-// API for doctor Login 
-const loginDoctor = async (req, res) => {
+// API for location Login 
+const loginLocation = async (req, res) => {
 
     try {
 
         const { email, password } = req.body
-        const user = await doctorModel.findOne({ email })
+        const user = await locationModel.findOne({ email })
 
         if (!user) {
             return res.json({ success: false, message: "Invalid credentials" })
@@ -31,12 +31,12 @@ const loginDoctor = async (req, res) => {
     }
 }
 
-// API to get doctor appointments for doctor panel
-const appointmentsDoctor = async (req, res) => {
+// API to get location appointments for location panel
+const appointmentsLocation = async (req, res) => {
     try {
 
-        const { docId } = req.body
-        const appointments = await appointmentModel.find({ docId })
+        const { locId } = req.body
+        const appointments = await appointmentModel.find({ locId })
 
         res.json({ success: true, appointments })
 
@@ -46,14 +46,14 @@ const appointmentsDoctor = async (req, res) => {
     }
 }
 
-// API to cancel appointment for doctor panel
+// API to cancel appointment for location panel
 const appointmentCancel = async (req, res) => {
     try {
 
-        const { docId, appointmentId } = req.body
+        const { locId, appointmentId } = req.body
 
         const appointmentData = await appointmentModel.findById(appointmentId)
-        if (appointmentData && appointmentData.docId === docId) {
+        if (appointmentData && appointmentData.locId === locId) {
             await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
             return res.json({ success: true, message: 'Appointment Cancelled' })
         }
@@ -67,14 +67,14 @@ const appointmentCancel = async (req, res) => {
 
 }
 
-// API to mark appointment completed for doctor panel
+// API to mark appointment completed for location panel
 const appointmentComplete = async (req, res) => {
     try {
 
-        const { docId, appointmentId } = req.body
+        const { locId, appointmentId } = req.body
 
         const appointmentData = await appointmentModel.findById(appointmentId)
-        if (appointmentData && appointmentData.docId === docId) {
+        if (appointmentData && appointmentData.locId === locId) {
             await appointmentModel.findByIdAndUpdate(appointmentId, { isCompleted: true })
             return res.json({ success: true, message: 'Appointment Completed' })
         }
@@ -88,12 +88,12 @@ const appointmentComplete = async (req, res) => {
 
 }
 
-// API to get all doctors list for Frontend
-const doctorList = async (req, res) => {
+// API to get all locations list for Frontend
+const locationList = async (req, res) => {
     try {
 
-        const doctors = await doctorModel.find({}).select(['-password', '-email'])
-        res.json({ success: true, doctors })
+        const locations = await locationModel.find({}).select(['-password', '-email'])
+        res.json({ success: true, locations })
 
     } catch (error) {
         console.log(error)
@@ -102,14 +102,14 @@ const doctorList = async (req, res) => {
 
 }
 
-// API to change doctor availablity for Admin and Doctor Panel
+// API to change location availablity for Admin and Location Panel
 const changeAvailablity = async (req, res) => {
     try {
 
-        const { docId } = req.body
+        const { locId } = req.body
 
-        const docData = await doctorModel.findById(docId)
-        await doctorModel.findByIdAndUpdate(docId, { available: !docData.available })
+        const locData = await locationModel.findById(locId)
+        await locationModel.findByIdAndUpdate(locId, { available: !locData.available })
         res.json({ success: true, message: 'Availablity Changed' })
 
     } catch (error) {
@@ -118,12 +118,12 @@ const changeAvailablity = async (req, res) => {
     }
 }
 
-// API to get doctor profile for  Doctor Panel
-const doctorProfile = async (req, res) => {
+// API to get location profile for  Location Panel
+const locationProfile = async (req, res) => {
     try {
 
-        const { docId } = req.body
-        const profileData = await doctorModel.findById(docId).select('-password')
+        const { locId } = req.body
+        const profileData = await locationModel.findById(locId).select('-password')
 
         res.json({ success: true, profileData })
 
@@ -133,15 +133,15 @@ const doctorProfile = async (req, res) => {
     }
 }
 
-// API to update doctor profile data from  Doctor Panel
-const updateDoctorProfile = async (req, res) => {
+// API to update location profile data from  Location Panel
+const updateLocationProfile = async (req, res) => {
     try {
 
-        const { docId, fees, address, available } = req.body
+        const { locId, fees, address, available } = req.body
 
-        await doctorModel.findByIdAndUpdate(docId, { fees, address, available })
+        await locationModel.findByIdAndUpdate(locId, { fees, address, available })
 
-        res.json({ success: true, message: 'Profile Updated' })
+        res.json({ success: true, message: 'Loaction Details Updated' })
 
     } catch (error) {
         console.log(error)
@@ -149,13 +149,13 @@ const updateDoctorProfile = async (req, res) => {
     }
 }
 
-// API to get dashboard data for doctor panel
-const doctorDashboard = async (req, res) => {
+// API to get dashboard data for locations panel
+const locationDashboard = async (req, res) => {
     try {
 
-        const { docId } = req.body
+        const { locId } = req.body
 
-        const appointments = await appointmentModel.find({ docId })
+        const appointments = await appointmentModel.find({ locId })
 
         let earnings = 0
 
@@ -191,13 +191,13 @@ const doctorDashboard = async (req, res) => {
 }
 
 export {
-    loginDoctor,
-    appointmentsDoctor,
+    loginLocation,
+    appointmentsLocation,
     appointmentCancel,
-    doctorList,
+    locationList,
     changeAvailablity,
     appointmentComplete,
-    doctorDashboard,
-    doctorProfile,
-    updateDoctorProfile
+    locationDashboard,
+    locationProfile,
+    updateLocationProfile
 }

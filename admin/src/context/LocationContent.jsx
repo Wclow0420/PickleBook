@@ -3,22 +3,22 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 
 
-export const DoctorContext = createContext()
+export const LocationContext = createContext()
 
-const DoctorContextProvider = (props) => {
+const locationContextProvider = (props) => {
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL
 
-    const [dToken, setDToken] = useState(localStorage.getItem('dToken') ? localStorage.getItem('dToken') : '')
+    const [lToken, setLToken] = useState(localStorage.getItem('lToken') ? localStorage.getItem('lToken') : '')
     const [appointments, setAppointments] = useState([])
     const [dashData, setDashData] = useState(false)
     const [profileData, setProfileData] = useState(false)
 
-    // Getting Doctor appointment data from Database using API
+    // Getting Location appointment data from Database using API
     const getAppointments = async () => {
         try {
 
-            const { data } = await axios.get(backendUrl + '/api/doctor/appointments', { headers: { dToken } })
+            const { data } = await axios.get(backendUrl + '/api/location/appointments', { headers: { lToken } })
 
             if (data.success) {
                 setAppointments(data.appointments.reverse())
@@ -32,11 +32,11 @@ const DoctorContextProvider = (props) => {
         }
     }
 
-    // Getting Doctor profile data from Database using API
+    // Getting Location profile data from Database using API
     const getProfileData = async () => {
         try {
 
-            const { data } = await axios.get(backendUrl + '/api/doctor/profile', { headers: { dToken } })
+            const { data } = await axios.get(backendUrl + '/api/location/profile', { headers: { lToken } })
             console.log(data.profileData)
             setProfileData(data.profileData)
 
@@ -46,12 +46,12 @@ const DoctorContextProvider = (props) => {
         }
     }
 
-    // Function to cancel doctor appointment using API
+    // Function to cancel location appointment using API
     const cancelAppointment = async (appointmentId) => {
 
         try {
 
-            const { data } = await axios.post(backendUrl + '/api/doctor/cancel-appointment', { appointmentId }, { headers: { dToken } })
+            const { data } = await axios.post(backendUrl + '/api/location/cancel-appointment', { appointmentId }, { headers: { lToken } })
 
             if (data.success) {
                 toast.success(data.message)
@@ -74,7 +74,7 @@ const DoctorContextProvider = (props) => {
 
         try {
 
-            const { data } = await axios.post(backendUrl + '/api/doctor/complete-appointment', { appointmentId }, { headers: { dToken } })
+            const { data } = await axios.post(backendUrl + '/api/location/complete-appointment', { appointmentId }, { headers: { lToken } })
 
             if (data.success) {
                 toast.success(data.message)
@@ -92,11 +92,11 @@ const DoctorContextProvider = (props) => {
 
     }
 
-    // Getting Doctor dashboard data using API
+    // Getting location dashboard data using API
     const getDashData = async () => {
         try {
 
-            const { data } = await axios.get(backendUrl + '/api/doctor/dashboard', { headers: { dToken } })
+            const { data } = await axios.get(backendUrl + '/api/location/dashboard', { headers: { lToken } })
 
             if (data.success) {
                 setDashData(data.dashData)
@@ -112,7 +112,7 @@ const DoctorContextProvider = (props) => {
     }
 
     const value = {
-        dToken, setDToken, backendUrl,
+        lToken, setLToken, backendUrl,
         appointments,
         getAppointments,
         cancelAppointment,
@@ -123,12 +123,12 @@ const DoctorContextProvider = (props) => {
     }
 
     return (
-        <DoctorContext.Provider value={value}>
+        <LocationContext.Provider value={value}>
             {props.children}
-        </DoctorContext.Provider>
+        </LocationContext.Provider>
     )
 
 
 }
 
-export default DoctorContextProvider
+export default locationContextProvider
