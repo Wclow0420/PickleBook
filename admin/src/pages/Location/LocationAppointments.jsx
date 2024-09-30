@@ -1,19 +1,19 @@
 import React from 'react'
 import { useContext, useEffect } from 'react'
-import { DoctorContext } from '../../context/DoctorContext'
+import { LocationContext } from '../../context/LocationContent'
 import { AppContext } from '../../context/AppContext'
 import { assets } from '../../assets/assets'
 
-const DoctorAppointments = () => {
+const LocationAppointments = () => {
 
-  const { dToken, appointments, getAppointments, cancelAppointment, completeAppointment } = useContext(DoctorContext)
+  const { lToken, appointments, getAppointments, cancelAppointment, completeAppointment } = useContext(LocationContext)
   const { slotDateFormat, calculateAge, currency } = useContext(AppContext)
 
   useEffect(() => {
-    if (dToken) {
+    if (lToken) {
       getAppointments()
     }
-  }, [dToken])
+  }, [lToken])
 
   return (
     <div className='w-full max-w-6xl m-5 '>
@@ -23,9 +23,8 @@ const DoctorAppointments = () => {
       <div className='bg-white border rounded text-sm max-h-[80vh] overflow-y-scroll'>
         <div className='max-sm:hidden grid grid-cols-[0.5fr_2fr_1fr_1fr_3fr_1fr_1fr] gap-1 py-3 px-6 border-b'>
           <p>#</p>
-          <p>Patient</p>
+          <p>UserID</p>
           <p>Payment</p>
-          <p>Age</p>
           <p>Date & Time</p>
           <p>Fees</p>
           <p>Action</p>
@@ -41,7 +40,6 @@ const DoctorAppointments = () => {
                 {item.payment?'Online':'CASH'}
               </p>
             </div>
-            <p className='max-sm:hidden'>{calculateAge(item.userData.dob)}</p>
             <p>{slotDateFormat(item.slotDate)}, {item.slotTime}</p>
             <p>{currency}{item.amount}</p>
             {item.cancelled
@@ -61,4 +59,4 @@ const DoctorAppointments = () => {
   )
 }
 
-export default DoctorAppointments
+export default LocationAppointments

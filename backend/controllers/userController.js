@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import validator from "validator";
 import userModel from "../models/userModel.js";
-import doctorModel from "../models/doctorModel.js";
+import locationModel from "../models/locationModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import { v2 as cloudinary } from 'cloudinary'
 import stripe from "stripe";
@@ -135,14 +135,14 @@ const bookAppointment = async (req, res) => {
 
     try {
 
-        const { userId, docId, slotDate, slotTime } = req.body
-        const docData = await doctorModel.findById(docId).select("-password")
+        const { userId, locId, slotDate, slotTime } = req.body
+        const locData = await locationModel.findById(locId).select("-password")
 
-        if (!docData.available) {
-            return res.json({ success: false, message: 'Doctor Not Available' })
+        if (!locData.available) {
+            return res.json({ success: false, message: 'Location Not Available' })
         }
 
-        let slots_booked = docData.slots_booked
+        let slots_booked = locData.slots_booked
 
         // checking for slot availablity 
         if (slots_booked[slotDate]) {
@@ -159,14 +159,14 @@ const bookAppointment = async (req, res) => {
 
         const userData = await userModel.findById(userId).select("-password")
 
-        delete docData.slots_booked
+        delete locData.slots_booked
 
         const appointmentData = {
             userId,
-            docId,
+            locId,
             userData,
-            docData,
-            amount: docData.fees,
+            locData,
+            amount: locData.fees,
             slotTime,
             slotDate,
             date: Date.now()
@@ -175,8 +175,8 @@ const bookAppointment = async (req, res) => {
         const newAppointment = new appointmentModel(appointmentData)
         await newAppointment.save()
 
-        // save new slots data in docData
-        await doctorModel.findByIdAndUpdate(docId, { slots_booked })
+        // save new slots data in locData
+        await locationModel.findByIdAndUpdate(locId, { slots_booked })
 
         res.json({ success: true, message: 'Appointment Booked' })
 
@@ -201,16 +201,16 @@ const cancelAppointment = async (req, res) => {
 
         await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
 
-        // releasing doctor slot 
-        const { docId, slotDate, slotTime } = appointmentData
+        // releasing location slot 
+        const { locId, slotDate, slotTime } = appointmentData
 
-        const doctorData = await doctorModel.findById(docId)
+        const locationData = await locationModel.findById(locId)
 
-        let slots_booked = doctorData.slots_booked
+        let slots_booked = locationData.slots_booked
 
         slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
 
-        await doctorModel.findByIdAndUpdate(docId, { slots_booked })
+        await locationModel.findByIdAndUpdate(locId, { slots_booked })
 
         res.json({ success: true, message: 'Appointment Cancelled' })
 

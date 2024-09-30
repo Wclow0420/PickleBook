@@ -1,26 +1,26 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
-const RelatedDoctors = ({ speciality, docId }) => {
+const RelatedLocations = ({ speciality, locId }) => {
 
     const navigate = useNavigate()
-    const { doctors } = useContext(AppContext)
+    const { locations } = useContext(AppContext)
 
-    const [relDoc, setRelDoc] = useState([])
+    const [relLoc, setRelLoc] = useState([])
 
     useEffect(() => {
-        if (doctors.length > 0 && speciality) {
-            const doctorsData = doctors.filter((doc) => doc.speciality === speciality && doc._id !== docId)
-            setRelDoc(doctorsData)
+        if (locations.length > 0 && speciality) {
+            const locationsData = locations.filter((loc) => loc.speciality === speciality && loc._id !== locId)
+            setRelLoc(locationsData)
         }
-    }, [doctors, speciality, docId])
+    }, [locations, speciality, locId])
 
     return (
         <div className='flex flex-col items-center gap-4 my-16 text-[#262626]'>
-            <h1 className='text-3xl font-medium'>Related Doctors</h1>
-            <p className='sm:w-1/3 text-center text-sm'>Simply browse through our extensive list of trusted doctors.</p>
+            <h1 className='text-3xl font-medium'>Related Locations</h1>
+            <p className='sm:w-1/3 text-center text-sm'>Simply browse through our extensive list of locations.</p>
             <div className='w-full grid grid-cols-auto gap-4 pt-5 gap-y-6 px-3 sm:px-0'>
-                {relDoc.map((item, index) => (
+                {relLoc.map((item, index) => (
                     <div onClick={() => { navigate(`/appointment/${item._id}`); scrollTo(0, 0) }} className='border border-[#C9D8FF] rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500' key={index}>
                         <img className='bg-[#EAEFFF]' src={item.image} alt="" />
                         <div className='p-4'>
@@ -38,4 +38,4 @@ const RelatedDoctors = ({ speciality, docId }) => {
     )
 }
 
-export default RelatedDoctors
+export default RelatedLocations

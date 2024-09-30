@@ -5,9 +5,9 @@ import axios from 'axios'
 import { AdminContext } from '../../context/AdminContext'
 import { AppContext } from '../../context/AppContext'
 
-const AddDoctor = () => {
+const AddLocation = () => {
 
-    const [docImg, setDocImg] = useState(false)
+    const [locImg, setLocImg] = useState(false)
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -27,13 +27,13 @@ const AddDoctor = () => {
 
         try {
 
-            if (!docImg) {
+            if (!locImg) {
                 return toast.error('Image Not Selected')
             }
 
             const formData = new FormData();
 
-            formData.append('image', docImg)
+            formData.append('image', locImg)
             formData.append('name', name)
             formData.append('email', email)
             formData.append('password', password)
@@ -49,10 +49,10 @@ const AddDoctor = () => {
                 console.log(`${key}: ${value}`);
             });
 
-            const { data } = await axios.post(backendUrl + '/api/admin/add-doctor', formData, { headers: { aToken } })
+            const { data } = await axios.post(backendUrl + '/api/admin/add-location', formData, { headers: { aToken } })
             if (data.success) {
                 toast.success(data.message)
-                setDocImg(false)
+                setLocImg(false)
                 setName('')
                 setPassword('')
                 setEmail('')
@@ -79,10 +79,10 @@ const AddDoctor = () => {
 
             <div className='bg-white px-8 py-8 border rounded w-full max-w-4xl max-h-[80vh] overflow-y-scroll'>
                 <div className='flex items-center gap-4 mb-8 text-gray-500'>
-                    <label htmlFor="doc-img">
-                        <img className='w-16 bg-gray-100 rounded-full cursor-pointer' src={docImg ? URL.createObjectURL(docImg) : assets.upload_area} alt="" />
+                    <label htmlFor="loc-img">
+                        <img className='w-16 bg-gray-100 rounded-full cursor-pointer' src={locImg ? URL.createObjectURL(locImg) : assets.upload_area} alt="" />
                     </label>
-                    <input onChange={(e) => setDocImg(e.target.files[0])} type="file" name="" id="doc-img" hidden />
+                    <input onChange={(e) => setLocImg(e.target.files[0])} type="file" name="" id="loc-img" hidden />
                     <p>Upload location <br /> picture</p>
                 </div>
 
@@ -91,7 +91,7 @@ const AddDoctor = () => {
                     <div className='w-full lg:flex-1 flex flex-col gap-4'>
 
                         <div className='flex-1 flex flex-col gap-1'>
-                            <p>Your name</p>
+                            <p>Location name</p>
                             <input onChange={e => setName(e.target.value)} value={name} className='border rounded px-3 py-2' type="text" placeholder='Name' required />
                         </div>
 
@@ -172,4 +172,4 @@ const AddDoctor = () => {
     )
 }
 
-export default AddDoctor
+export default AddLocation

@@ -1,23 +1,23 @@
 import React from 'react'
 import { useContext } from 'react'
 import { useEffect } from 'react'
-import { DoctorContext } from '../../context/DoctorContext'
+import { LocationContext } from '../../context/LocationContent'
 import { assets } from '../../assets/assets'
 import { AppContext } from '../../context/AppContext'
 
-const DoctorDashboard = () => {
+const LocationDashboard = () => {
 
-  const { dToken, dashData, getDashData, cancelAppointment, completeAppointment } = useContext(DoctorContext)
+  const { lToken, dashData, getDashData, cancelAppointment, completeAppointment } = useContext(LocationContext)
   const { slotDateFormat, currency } = useContext(AppContext)
 
 
   useEffect(() => {
 
-    if (dToken) {
+    if (lToken) {
       getDashData()
     }
 
-  }, [dToken])
+  }, [lToken])
 
   return dashData && (
     <div className='m-5'>
@@ -77,4 +77,4 @@ const DoctorDashboard = () => {
   )
 }
 
-export default DoctorDashboard
+export default LocationDashboard

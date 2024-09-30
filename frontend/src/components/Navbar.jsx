@@ -78,12 +78,11 @@
 
 import React, { useContext, useState, useEffect } from 'react'
 import { assets } from '../assets/assets'
-import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
 
 const Navbar = () => {
   const navigate = useNavigate()
-  const location = useLocation()
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const { token, setToken, userData } = useContext(AppContext)
 
@@ -103,7 +102,7 @@ const Navbar = () => {
 
   const navItems = [
     { path: '/', label: 'Home', icon: assets.home_icon },
-    { path: '/doctors', label: 'Booking', icon: assets.booking_icon },
+    { path: '/locations', label: 'Booking', icon: assets.booking_icon },
     { path: '/about', label: 'Plan', icon: assets.plan_icon },
     { path: '/contact', label: 'Profile', icon: assets.profile_icon },
   ]

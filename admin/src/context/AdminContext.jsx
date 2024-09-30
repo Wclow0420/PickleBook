@@ -12,17 +12,17 @@ const AdminContextProvider = (props) => {
     const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStorage.getItem('aToken') : '')
 
     const [appointments, setAppointments] = useState([])
-    const [doctors, setDoctors] = useState([])
+    const [locations, setLocations] = useState([])
     const [dashData, setDashData] = useState(false)
 
-    // Getting all Doctors data from Database using API
-    const getAllDoctors = async () => {
+    // Getting all Locations data from Database using API
+    const getAllLocations = async () => {
 
         try {
 
-            const { data } = await axios.get(backendUrl + '/api/admin/all-doctors', { headers: { aToken } })
+            const { data } = await axios.get(backendUrl + '/api/admin/all-locations', { headers: { aToken } })
             if (data.success) {
-                setDoctors(data.doctors)
+                setLocations(data.locations)
             } else {
                 toast.error(data.message)
             }
@@ -33,14 +33,14 @@ const AdminContextProvider = (props) => {
 
     }
 
-    // Function to change doctor availablity using API
-    const changeAvailability = async (docId) => {
+    // Function to change location availablity using API
+    const changeAvailability = async (locId) => {
         try {
 
-            const { data } = await axios.post(backendUrl + '/api/admin/change-availability', { docId }, { headers: { aToken } })
+            const { data } = await axios.post(backendUrl + '/api/admin/change-availability', { locId }, { headers: { aToken } })
             if (data.success) {
                 toast.success(data.message)
-                getAllDoctors()
+                getAllLocations()
             } else {
                 toast.error(data.message)
             }
@@ -113,8 +113,8 @@ const AdminContextProvider = (props) => {
 
     const value = {
         aToken, setAToken,
-        doctors,
-        getAllDoctors,
+        locations,
+        getAllLocations,
         changeAvailability,
         appointments,
         getAllAppointments,

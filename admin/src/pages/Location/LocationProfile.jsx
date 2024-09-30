@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { DoctorContext } from '../../context/DoctorContext'
+import { LocationContext } from '../../context/LocationContent'
 import { AppContext } from '../../context/AppContext'
 import { toast } from 'react-toastify'
 import axios from 'axios'
 
-const DoctorProfile = () => {
+const LocationProfile = () => {
 
-    const { dToken, profileData, setProfileData, getProfileData } = useContext(DoctorContext)
+    const { lToken, profileData, setProfileData, getProfileData } = useContext(LocationContext)
     const { currency, backendUrl } = useContext(AppContext)
     const [isEdit, setIsEdit] = useState(false)
 
@@ -21,7 +21,7 @@ const DoctorProfile = () => {
                 available: profileData.available
             }
 
-            const { data } = await axios.post(backendUrl + '/api/doctor/update-profile', updateData, { headers: { dToken } })
+            const { data } = await axios.post(backendUrl + '/api/location/update-profile', updateData, { headers: { lToken } })
 
             if (data.success) {
                 toast.success(data.message)
@@ -41,10 +41,10 @@ const DoctorProfile = () => {
     }
 
     useEffect(() => {
-        if (dToken) {
+        if (lToken) {
             getProfileData()
         }
-    }, [dToken])
+    }, [lToken])
 
     return profileData && (
         <div>
@@ -105,4 +105,4 @@ const DoctorProfile = () => {
     )
 }
 
-export default DoctorProfile
+export default LocationProfile
