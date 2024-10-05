@@ -146,7 +146,7 @@ const bookAppointment = async (req, res) => {
 
         // checking for slot availablity 
         if (slots_booked[slotDate]) {
-            if (slots_booked[slotDate].includes(startTime)) {
+            if (slots_booked[slotDate].includes(startTime,endTime)) {
                 return res.json({ success: false, message: 'Slot Not Available' })
             }
             else {
@@ -187,6 +187,7 @@ const bookAppointment = async (req, res) => {
     }
 
 }
+
 
 // API to cancel appointment
 const cancelAppointment = async (req, res) => {

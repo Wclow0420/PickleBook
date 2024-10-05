@@ -110,6 +110,11 @@ const Appointment = () => {
             return navigate('/login')
         }
 
+        // Check if the duration is selected before proceeding
+        if (!duration) {
+            toast.warning('Please select a duration before booking');
+            return;
+        }
         const date = locSlots[slotIndex][0].datetime
 
         let day = date.getDate()
