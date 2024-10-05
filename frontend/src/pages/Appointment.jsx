@@ -15,7 +15,9 @@ const Appointment = () => {
     const [locInfo, setLocInfo] = useState(false)
     const [locSlots, setLocSlots] = useState([])
     const [slotIndex, setSlotIndex] = useState(0)
-    const [slotTime, setSlotTime] = useState('')
+    const [startTime, setStartTime] = useState('')
+    const [duration, setDuration] = useState('')
+    const [endTime,setEndTime] = useState('')
 
     const navigate = useNavigate()
 
@@ -45,7 +47,7 @@ const Appointment = () => {
             // setting hours 
             if (today.getDate() === currentDate.getDate()) {
                 currentDate.setHours(currentDate.getHours() > 10 ? currentDate.getHours() + 1 : 10)
-                currentDate.setMinutes(currentDate.getMinutes() > 30 ? 30 : 0)
+                currentDate.setMinutes(currentDate.getMinutes() > 30 ? 0 : 0)
             } else {
                 currentDate.setHours(10)
                 currentDate.setMinutes(0)
@@ -62,9 +64,9 @@ const Appointment = () => {
                 let year = currentDate.getFullYear()
 
                 const slotDate = day + "_" + month + "_" + year
-                const slotTime = formattedTime
+                const startTime = formattedTime
 
-                const isSlotAvailable = locInfo.slots_booked[slotDate] && locInfo.slots_booked[slotDate].includes(slotTime) ? false : true
+                const isSlotAvailable = locInfo.slots_booked[slotDate] && locInfo.slots_booked[slotDate].includes(startTime) ? false : true
 
                 if (isSlotAvailable) {
 
@@ -76,13 +78,29 @@ const Appointment = () => {
                 }
 
                 // Increment current time by 30 minutes
-                currentDate.setMinutes(currentDate.getMinutes() + 30);
+                currentDate.setMinutes(currentDate.getMinutes() + 60);
             }
 
             setLocSlots(prev => ([...prev, timeSlots]))
 
         }
 
+    }
+
+    // Function to calculate end time based on start time and duration
+    const calculateEndTime = (startTime, duration) => {
+        const [hour, minutePart] = startTime.split(':')
+        const minutes = parseInt(minutePart)
+        const startHour = parseInt(hour)
+        let endHour = startHour + parseInt(duration)
+        let endMinutes = minutes
+
+        // If the end time exceeds 24 hours, you may want to adjust it accordingly (optional)
+        if (endHour >= 24) {
+            endHour = endHour - 24
+        }
+
+        return `${endHour.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`
     }
 
     const bookAppointment = async () => {
@@ -100,9 +118,12 @@ const Appointment = () => {
 
         const slotDate = day + "_" + month + "_" + year
 
-        try {
+        // Calculate the end time using the selected start time and duration
+        const calculatedEndTime = calculateEndTime(startTime, duration)
+        setEndTime(calculatedEndTime) // Optionally set this in state if needed elsewhere
 
-            const { data } = await axios.post(backendUrl + '/api/user/book-appointment', { locId, slotDate, slotTime }, { headers: { token } })
+        try {
+            const { data } = await axios.post(backendUrl + '/api/user/book-appointment', { locId, slotDate, startTime, endTime: calculatedEndTime }, { headers: { token } })
             if (data.success) {
                 toast.success(data.message)
                 getLocatiosData()
@@ -117,6 +138,7 @@ const Appointment = () => {
         }
 
     }
+
 
     useEffect(() => {
         if (locations.length > 0) {
@@ -171,10 +193,38 @@ const Appointment = () => {
                     ))}
                 </div>
 
-                <div className='flex items-center gap-3 w-full overflow-x-scroll mt-4'>
-                    {locSlots.length && locSlots[slotIndex].map((item, index) => (
-                        <p onClick={() => setSlotTime(item.time)} key={index} className={`text-sm font-light  flex-shrink-0 px-5 py-2 rounded-full cursor-pointer ${item.time === slotTime ? 'bg-primary text-white' : 'text-[#949494] border border-[#B4B4B4]'}`}>{item.time.toLowerCase()}</p>
-                    ))}
+                <div className='mt-4'>
+                    <label htmlFor="startTime">Select Start Time</label>
+                    <select
+                        id="startTime"
+                        className="border border-gray-300 rounded px-4 py-2 mt-2"
+                        onChange={(e) => setStartTime(e.target.value)}  // Set the selected start time
+                        value={startTime}  // Current selected value
+                    >
+                        <option value="" disabled>Select a time</option>  {/* Placeholder */}
+                        {locSlots.length > 0 && locSlots[slotIndex].map((item, index) => (
+                            <option key={index} value={item.time}>
+                                {item.time.toLowerCase()} {/* Display the time */}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className='mt-4'>
+                    {/* Booking Hours Dropdown */}
+                    <label htmlFor="duration">Booking Hours</label>
+                    <select
+                        id="duration"
+                        className="border border-gray-300 rounded px-4 py-2 mt-2"
+                        onChange={(e) => setDuration(e.target.value)}  // Set the selected duration
+                        value={duration}  // Current selected value
+                    >
+                        <option value="" disabled>Select hours</option> {/* Placeholder */}
+                        {[1, 2, 3, 4].map((hour, index) => (
+                            <option key={index} value={hour}>
+                                {hour} hour{hour > 1 ? 's' : ''}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <button onClick={bookAppointment} className='bg-primary text-white text-sm font-light px-20 py-3 rounded-full my-6'>Book an appointment</button>

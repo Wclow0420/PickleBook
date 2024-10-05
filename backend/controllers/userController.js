@@ -135,7 +135,7 @@ const bookAppointment = async (req, res) => {
 
     try {
 
-        const { userId, locId, slotDate, slotTime } = req.body
+        const { userId, locId, slotDate, startTime,endTime } = req.body
         const locData = await locationModel.findById(locId).select("-password")
 
         if (!locData.available) {
@@ -146,15 +146,15 @@ const bookAppointment = async (req, res) => {
 
         // checking for slot availablity 
         if (slots_booked[slotDate]) {
-            if (slots_booked[slotDate].includes(slotTime)) {
+            if (slots_booked[slotDate].includes(startTime)) {
                 return res.json({ success: false, message: 'Slot Not Available' })
             }
             else {
-                slots_booked[slotDate].push(slotTime)
+                slots_booked[slotDate].push(startTime,endTime)
             }
         } else {
             slots_booked[slotDate] = []
-            slots_booked[slotDate].push(slotTime)
+            slots_booked[slotDate].push(startTime,endTime)
         }
 
         const userData = await userModel.findById(userId).select("-password")
@@ -167,7 +167,8 @@ const bookAppointment = async (req, res) => {
             userData,
             locData,
             amount: locData.fees,
-            slotTime,
+            startTime,
+            endTime,
             slotDate,
             date: Date.now()
         }
@@ -201,14 +202,14 @@ const cancelAppointment = async (req, res) => {
 
         await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
 
-        // releasing location slot 
-        const { locId, slotDate, slotTime } = appointmentData
+        // releasing doctor slot 
+        const { locId, slotDate, startTime, endTime } = appointmentData
 
         const locationData = await locationModel.findById(locId)
 
         let slots_booked = locationData.slots_booked
 
-        slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
+        slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== startTime)
 
         await locationModel.findByIdAndUpdate(locId, { slots_booked })
 

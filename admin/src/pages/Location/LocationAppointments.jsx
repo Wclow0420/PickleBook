@@ -40,7 +40,8 @@ const LocationAppointments = () => {
                 {item.payment?'Online':'CASH'}
               </p>
             </div>
-            <p>{slotDateFormat(item.slotDate)}, {item.slotTime}</p>
+            <p className='max-sm:hidden'>{calculateAge(item.userData.dob)}</p>
+            <p>{slotDateFormat(item.slotDate)}, {item.startTime}</p>
             <p>{currency}{item.amount}</p>
             {item.cancelled
               ? <p className='text-red-400 text-xs font-medium'>Cancelled</p>
