@@ -20,7 +20,7 @@ const TopDoctors = () => {
                                 <p className={`w-2 h-2 rounded-full ${item.available ? 'bg-green-500' : "bg-gray-500"}`}></p><p>{item.available ? 'Available' : "Not Available"}</p>
                             </div>
                             <p className='text-[#262626] text-lg font-medium'>{item.name}</p>
-                            <p className='text-[#5C5C5C] text-sm'>{item.speciality}</p>
+                            <p className='text-[#5C5C5C] text-sm'>{item.Area}</p>
                         </div>
                     </div>
                 ))}

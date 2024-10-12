@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
-const RelatedLocations = ({ speciality, locId }) => {
+const RelatedLocations = ({ Area, locId }) => {
 
     const navigate = useNavigate()
     const { locations } = useContext(AppContext)
@@ -9,11 +9,11 @@ const RelatedLocations = ({ speciality, locId }) => {
     const [relLoc, setRelLoc] = useState([])
 
     useEffect(() => {
-        if (locations.length > 0 && speciality) {
-            const locationsData = locations.filter((loc) => loc.speciality === speciality && loc._id !== locId)
+        if (locations.length > 0 && Area) {
+            const locationsData = locations.filter((loc) => loc.Area === Area && loc._id !== locId)
             setRelLoc(locationsData)
         }
-    }, [locations, speciality, locId])
+    }, [locations, Area, locId])
 
     return (
         <div className='flex flex-col items-center gap-4 my-16 text-[#262626]'>
@@ -28,7 +28,7 @@ const RelatedLocations = ({ speciality, locId }) => {
                                 <p className={`w-2 h-2 rounded-full ${item.available ? 'bg-green-500' : "bg-gray-500"}`}></p><p>{item.available ? 'Available' : "Not Available"}</p>
                             </div>
                             <p className='text-[#262626] text-lg font-medium'>{item.name}</p>
-                            <p className='text-[#5C5C5C] text-sm'>{item.speciality}</p>
+                            <p className='text-[#5C5C5C] text-sm'>{item.Area}</p>
                         </div>
                     </div>
                 ))}

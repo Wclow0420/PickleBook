@@ -1,5 +1,5 @@
 import express from 'express';
-import { loginLocation, appointmentsLocation, appointmentCancel, locationList, changeAvailablity, appointmentComplete, locationDashboard, locationProfile, updateLocationProfile } from '../controllers/locationController.js';
+import { loginLocation, appointmentsLocation, appointmentCancel, locationList, changeAvailablity, appointmentComplete, locationDashboard, locationProfile, updateLocationProfile} from '../controllers/locationController.js';
 import authLocation from '../middleware/authLocation.js';
 const locationRouter = express.Router();
 

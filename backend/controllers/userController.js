@@ -130,63 +130,156 @@ const updateProfile = async (req, res) => {
     }
 }
 
-// API to book appointment 
-const bookAppointment = async (req, res) => {
 
+// API to get available courts
+const getAvailableCourts = async (req, res) => {
     try {
+        const { locId, slotDate, startTime, endTime } = req.query;
+        const location = await locationModel.findById(locId);
+        
+        if (!location) {
+            return res.json({ success: false, message: 'Location not found' });
+        }
 
-        const { userId, locId, slotDate, startTime,endTime } = req.body
-        const locData = await locationModel.findById(locId).select("-password")
+        // Find all appointments for the given location and date that overlap with the requested time slot
+        const bookedAppointments = await appointmentModel.find({
+            locId,
+            slotDate,
+            $or: [
+                { startTime: { $lt: endTime, $gte: startTime } },
+                { endTime: { $gt: startTime, $lte: endTime } },
+                { $and: [{ startTime: { $lte: startTime } }, { endTime: { $gte: endTime } }] }
+            ]
+        });
+
+        // Get the courtIds of booked appointments
+        const bookedCourtIds = new Set(bookedAppointments.map(apt => apt.courtId));
+
+        // Generate an array of all court numbers based on totalCourt
+        const allCourts = Array.from({ length: location.totalCourt }, (_, i) => i + 1);
+
+        // Filter out the booked courts to get available courts
+        const availableCourts = allCourts.filter(court => !bookedCourtIds.has(court));
+
+        res.json({ success: true, availableCourts });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+
+
+// Updated API to book appointment
+const bookAppointment = async (req, res) => {
+    try {
+        const { userId, locId, slotDate, startTime, endTime, duration, courtId } = req.body;
+        const locData = await locationModel.findById(locId).select("-password");
 
         if (!locData.available) {
-            return res.json({ success: false, message: 'Location Not Available' })
+            return res.json({ success: false, message: 'Location Not Available' });
         }
 
-        let slots_booked = locData.slots_booked
+        // Check if the court is already booked for the given time slot
+        const conflictingAppointment = await appointmentModel.findOne({
+            locId,
+            slotDate,
+            courtId,
+            $or: [
+                { startTime: { $lt: endTime, $gte: startTime } },
+                { endTime: { $gt: startTime, $lte: endTime } },
+                { $and: [{ startTime: { $lte: startTime } }, { endTime: { $gte: endTime } }] }
+            ]
+        });
 
-        // checking for slot availablity 
-        if (slots_booked[slotDate]) {
-            if (slots_booked[slotDate].includes(startTime,endTime)) {
-                return res.json({ success: false, message: 'Slot Not Available' })
-            }
-            else {
-                slots_booked[slotDate].push(startTime,endTime)
-            }
-        } else {
-            slots_booked[slotDate] = []
-            slots_booked[slotDate].push(startTime,endTime)
+        if (conflictingAppointment) {
+            return res.json({ success: false, message: 'Court Not Available for the selected time slot' });
         }
 
-        const userData = await userModel.findById(userId).select("-password")
-
-        delete locData.slots_booked
+        const userData = await userModel.findById(userId).select("-password");
 
         const appointmentData = {
             userId,
             locId,
             userData,
             locData,
-            amount: locData.fees,
+            amount: locData.fees * duration,
             startTime,
             endTime,
+            duration,
+            courtId,
             slotDate,
             date: Date.now()
-        }
+        };
 
-        const newAppointment = new appointmentModel(appointmentData)
-        await newAppointment.save()
+        const newAppointment = new appointmentModel(appointmentData);
+        await newAppointment.save();
 
-        // save new slots data in locData
-        await locationModel.findByIdAndUpdate(locId, { slots_booked })
-
-        res.json({ success: true, message: 'Appointment Booked' })
-
+        res.json({ success: true, message: 'Appointment Booked' });
     } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        console.log(error);
+        res.json({ success: false, message: error.message });
     }
+};
 
-}
+
+// API to book appointment 
+// const bookAppointment = async (req, res) => {
+
+//     try {
+
+//         const { userId, locId, slotDate, startTime,endTime } = req.body
+//         const locData = await locationModel.findById(locId).select("-password")
+
+//         if (!locData.available) {
+//             return res.json({ success: false, message: 'Location Not Available' })
+//         }
+
+//         let slots_booked = locData.slots_booked
+
+//         // checking for slot availablity 
+//         if (slots_booked[slotDate]) {
+//             if (slots_booked[slotDate].includes(startTime,endTime)) {
+//                 return res.json({ success: false, message: 'Slot Not Available' })
+//             }
+//             else {
+//                 slots_booked[slotDate].push(startTime,endTime)
+//             }
+//         } else {
+//             slots_booked[slotDate] = []
+//             slots_booked[slotDate].push(startTime,endTime)
+//         }
+
+//         const userData = await userModel.findById(userId).select("-password")
+
+//         delete locData.slots_booked
+
+//         const appointmentData = {
+//             userId,
+//             locId,
+//             userData,
+//             locData,
+//             amount: locData.fees,
+//             startTime,
+//             endTime,
+//             slotDate,
+//             date: Date.now()
+//         }
+
+//         const newAppointment = new appointmentModel(appointmentData)
+//         await newAppointment.save()
+
+//         // save new slots data in locData
+//         await locationModel.findByIdAndUpdate(locId, { slots_booked })
+
+//         res.json({ success: true, message: 'Appointment Booked' })
+
+//     } catch (error) {
+//         console.log(error)
+//         res.json({ success: false, message: error.message })
+//     }
+
+// }
 
 
 // API to cancel appointment
@@ -356,5 +449,6 @@ export {
     paymentRazorpay,
     verifyRazorpay,
     paymentStripe,
-    verifyStripe
+    verifyStripe,
+    getAvailableCourts,
 }

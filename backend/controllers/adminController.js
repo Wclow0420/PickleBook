@@ -62,11 +62,11 @@ const addLocation = async (req, res) => {
 
     try {
 
-        const { name, email, password, speciality, about, fees, address } = req.body
+        const { name, email, password, Area, about, fees, address, totalCourt } = req.body
         const imageFile = req.file
 
         // checking for all data to add location
-        if (!name || !email || !password || !speciality || !about || !fees || !address) {
+        if (!name || !email || !password || !Area || !about || !fees || !address || !totalCourt) {
             return res.json({ success: false, message: "Missing Details" })
         }
 
@@ -93,13 +93,15 @@ const addLocation = async (req, res) => {
             email,
             image: imageUrl,
             password: hashedPassword,
-            speciality,
+            Area,
             // degree,
             // experience,
             about,
             fees,
+            
             address: JSON.parse(address),
-            date: Date.now()
+            date: Date.now(),
+            totalCourt,
         }
 
         const newLocation = new locationModel(locationData)
