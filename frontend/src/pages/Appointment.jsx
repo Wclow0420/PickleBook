@@ -254,6 +254,7 @@ import RelatedLocations from '../components/RelatedLocations'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import CourtSelection from '../components/CourtSelection';
+import TimePicker from '../components/TimePicker';
 
 const Appointment = () => {
     const { locId } = useParams()
@@ -266,7 +267,9 @@ const Appointment = () => {
     const [startTime, setStartTime] = useState('')
     const [duration, setDuration] = useState('')
     const [endTime, setEndTime] = useState('')
-    const [selectedCourt, setSelectedCourt] = useState(null)
+    // const [selectedCourt, setSelectedCourt] = useState(null)
+    const [selectedCourts, setSelectedCourts] = useState([]);
+
     const [availableCourts, setAvailableCourts] = useState([])
 
     const navigate = useNavigate()
@@ -369,27 +372,74 @@ const Appointment = () => {
         }
     }
 
+    // const bookAppointment = async () => {
+    //     if (!token) {
+    //         toast.warning('Login to book appointment')
+    //         return navigate('/login')
+    //     }
+
+    //     if (!duration) {
+    //         toast.warning('Please select a duration before booking')
+    //         return
+    //     }
+
+    //     if (!selectedCourt) {
+    //         toast.warning('Please select a court before booking')
+    //         return
+    //     }
+
+    //     const date = locSlots[slotIndex][0].datetime
+    //     const slotDate = `${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}`
+    //     const calculatedEndTime = calculateEndTime(startTime, duration)
+    //     setEndTime(calculatedEndTime)
+
+    //     try {
+    //         const { data } = await axios.post(backendUrl + '/api/user/book-appointment', 
+    //             { 
+    //                 locId, 
+    //                 slotDate, 
+    //                 startTime, 
+    //                 endTime: calculatedEndTime, 
+    //                 duration: parseInt(duration),
+    //                 courtId: selectedCourt 
+    //             }, 
+    //             { headers: { token } }
+    //         )
+    //         if (data.success) {
+    //             toast.success(data.message)
+    //             getLocatiosData()
+    //             navigate('/my-appointments')
+    //         } else {
+    //             toast.error(data.message)
+    //         }
+    //     } catch (error) {
+    //         console.log(error)
+    //         toast.error(error.message)
+    //     }
+    // }
+
+
     const bookAppointment = async () => {
         if (!token) {
-            toast.warning('Login to book appointment')
-            return navigate('/login')
+            toast.warning('Login to book appointment');
+            return navigate('/login');
         }
-
+    
         if (!duration) {
-            toast.warning('Please select a duration before booking')
-            return
+            toast.warning('Please select a duration before booking');
+            return;
         }
-
-        if (!selectedCourt) {
-            toast.warning('Please select a court before booking')
-            return
+    
+        if (selectedCourts.length === 0) {
+            toast.warning('Please select at least one court before booking');
+            return;
         }
-
-        const date = locSlots[slotIndex][0].datetime
-        const slotDate = `${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}`
-        const calculatedEndTime = calculateEndTime(startTime, duration)
-        setEndTime(calculatedEndTime)
-
+    
+        const date = locSlots[slotIndex][0].datetime;
+        const slotDate = `${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}`;
+        const calculatedEndTime = calculateEndTime(startTime, duration);
+        setEndTime(calculatedEndTime);
+    
         try {
             const { data } = await axios.post(backendUrl + '/api/user/book-appointment', 
                 { 
@@ -398,23 +448,23 @@ const Appointment = () => {
                     startTime, 
                     endTime: calculatedEndTime, 
                     duration: parseInt(duration),
-                    courtId: selectedCourt 
+                    courtIds: selectedCourts
                 }, 
                 { headers: { token } }
-            )
+            );
             if (data.success) {
-                toast.success(data.message)
-                getLocatiosData()
-                navigate('/my-appointments')
+                toast.success(data.message);
+                getLocatiosData();
+                navigate('/my-appointments');
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
         } catch (error) {
-            console.log(error)
-            toast.error(error.message)
+            console.log(error);
+            toast.error(error.message);
         }
-    }
-
+    };
+    
     useEffect(() => {
         if (locations.length > 0) {
             fetchLocInfo()
@@ -457,16 +507,16 @@ const Appointment = () => {
             {/* Booking slots */}
             <div className='sm:ml-72 sm:pl-4 mt-8 font-medium text-[#565656]'>
                 <p>Booking slots</p>
-                <div className='flex gap-3 items-center w-full overflow-x-scroll mt-4'>
+                {/* <div className='flex gap-3 items-center w-full overflow-x-scroll mt-4'>
                     {locSlots.length && locSlots.map((item, index) => (
                         <div onClick={() => setSlotIndex(index)} key={index} className={`text-center py-6 min-w-16 rounded-full cursor-pointer ${slotIndex === index ? 'bg-primary text-white' : 'border border-[#DDDDDD]'}`}>
                             <p>{item[0] && daysOfWeek[item[0].datetime.getDay()]}</p>
                             <p>{item[0] && item[0].datetime.getDate()}</p>
                         </div>
                     ))}
-                </div>
+                </div> */}
 
-                <div className='mt-4'>
+                {/* <div className='mt-4'>
                     <label className='pr-2' htmlFor="startTime">Select Start Time</label>
                     <select
                         id="startTime"
@@ -481,6 +531,14 @@ const Appointment = () => {
                             </option>
                         ))}
                     </select>
+                </div> */}
+
+                <div className='mt-4'>
+                    <label className='pr-2' htmlFor="startTime">Select Date</label>
+                    <TimePicker 
+                        value={startTime}
+                        onChange={(time) => setStartTime(time)}
+                    />
                 </div>
 
                 <div className='mt-4'>
@@ -500,10 +558,15 @@ const Appointment = () => {
                     </select>
                 </div>
 
-                <CourtSelection 
+                {/* <CourtSelection 
                     availableCourts={availableCourts}
                     selectedCourt={selectedCourt}
-                    setSelectedCourt={setSelectedCourt}/>
+                    setSelectedCourt={setSelectedCourt}/> */}
+                <CourtSelection 
+                    availableCourts={availableCourts}
+                    selectedCourts={selectedCourts}
+                    setSelectedCourts={setSelectedCourts}
+                />
 
                 <button onClick={bookAppointment} className='bg-primary text-white text-sm font-light px-20 py-3 rounded-full my-6'>Book an appointment</button>
             </div>

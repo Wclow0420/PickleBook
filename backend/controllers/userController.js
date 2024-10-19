@@ -171,20 +171,71 @@ const getAvailableCourts = async (req, res) => {
 
 
 // Updated API to book appointment
+// const bookAppointment = async (req, res) => {
+//     try {
+//         const { userId, locId, slotDate, startTime, endTime, duration, courtId } = req.body;
+//         const locData = await locationModel.findById(locId).select("-password");
+
+//         if (!locData.available) {
+//             return res.json({ success: false, message: 'Location Not Available' });
+//         }
+
+//         // Check if the court is already booked for the given time slot
+//         const conflictingAppointment = await appointmentModel.findOne({
+//             locId,
+//             slotDate,
+//             courtId,
+//             $or: [
+//                 { startTime: { $lt: endTime, $gte: startTime } },
+//                 { endTime: { $gt: startTime, $lte: endTime } },
+//                 { $and: [{ startTime: { $lte: startTime } }, { endTime: { $gte: endTime } }] }
+//             ]
+//         });
+
+//         if (conflictingAppointment) {
+//             return res.json({ success: false, message: 'Court Not Available for the selected time slot' });
+//         }
+
+//         const userData = await userModel.findById(userId).select("-password");
+
+//         const appointmentData = {
+//             userId,
+//             locId,
+//             userData,
+//             locData,
+//             amount: locData.fees * duration,
+//             startTime,
+//             endTime,
+//             duration,
+//             courtId,
+//             slotDate,
+//             date: Date.now()
+//         };
+
+//         const newAppointment = new appointmentModel(appointmentData);
+//         await newAppointment.save();
+
+//         res.json({ success: true, message: 'Appointment Booked' });
+//     } catch (error) {
+//         console.log(error);
+//         res.json({ success: false, message: error.message });
+//     }
+// };
+
 const bookAppointment = async (req, res) => {
     try {
-        const { userId, locId, slotDate, startTime, endTime, duration, courtId } = req.body;
+        const { userId, locId, slotDate, startTime, endTime, duration, courtIds } = req.body;
         const locData = await locationModel.findById(locId).select("-password");
-
+        
         if (!locData.available) {
             return res.json({ success: false, message: 'Location Not Available' });
         }
 
-        // Check if the court is already booked for the given time slot
-        const conflictingAppointment = await appointmentModel.findOne({
+        // Check if any of the selected courts are already booked
+        const conflictingAppointments = await appointmentModel.findOne({
             locId,
             slotDate,
-            courtId,
+            courtId: { $in: courtIds },
             $or: [
                 { startTime: { $lt: endTime, $gte: startTime } },
                 { endTime: { $gt: startTime, $lte: endTime } },
@@ -192,13 +243,14 @@ const bookAppointment = async (req, res) => {
             ]
         });
 
-        if (conflictingAppointment) {
-            return res.json({ success: false, message: 'Court Not Available for the selected time slot' });
+        if (conflictingAppointments) {
+            return res.json({ success: false, message: 'One or more courts are not available for the selected time slot' });
         }
 
         const userData = await userModel.findById(userId).select("-password");
 
-        const appointmentData = {
+        // Create appointments for each selected court
+        const appointments = courtIds.map(courtId => ({
             userId,
             locId,
             userData,
@@ -210,17 +262,16 @@ const bookAppointment = async (req, res) => {
             courtId,
             slotDate,
             date: Date.now()
-        };
+        }));
 
-        const newAppointment = new appointmentModel(appointmentData);
-        await newAppointment.save();
-
-        res.json({ success: true, message: 'Appointment Booked' });
+        await appointmentModel.insertMany(appointments);
+        res.json({ success: true, message: 'Appointments Booked Successfully' });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });
     }
 };
+
 
 
 // API to book appointment 
