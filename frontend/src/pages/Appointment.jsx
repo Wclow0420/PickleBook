@@ -372,52 +372,6 @@ const Appointment = () => {
         }
     }
 
-    // const bookAppointment = async () => {
-    //     if (!token) {
-    //         toast.warning('Login to book appointment')
-    //         return navigate('/login')
-    //     }
-
-    //     if (!duration) {
-    //         toast.warning('Please select a duration before booking')
-    //         return
-    //     }
-
-    //     if (!selectedCourt) {
-    //         toast.warning('Please select a court before booking')
-    //         return
-    //     }
-
-    //     const date = locSlots[slotIndex][0].datetime
-    //     const slotDate = `${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}`
-    //     const calculatedEndTime = calculateEndTime(startTime, duration)
-    //     setEndTime(calculatedEndTime)
-
-    //     try {
-    //         const { data } = await axios.post(backendUrl + '/api/user/book-appointment', 
-    //             { 
-    //                 locId, 
-    //                 slotDate, 
-    //                 startTime, 
-    //                 endTime: calculatedEndTime, 
-    //                 duration: parseInt(duration),
-    //                 courtId: selectedCourt 
-    //             }, 
-    //             { headers: { token } }
-    //         )
-    //         if (data.success) {
-    //             toast.success(data.message)
-    //             getLocatiosData()
-    //             navigate('/my-appointments')
-    //         } else {
-    //             toast.error(data.message)
-    //         }
-    //     } catch (error) {
-    //         console.log(error)
-    //         toast.error(error.message)
-    //     }
-    // }
-
 
     const bookAppointment = async () => {
         if (!token) {
@@ -541,22 +495,22 @@ const Appointment = () => {
                     />
                 </div>
 
-                <div className='mt-4'>
-                    <label className='pr-7' htmlFor="duration">Booking Hours</label>
+                <div className="relative mt-4">
+                    <label className="block text-sm mb-1">Booking Hours</label>
                     <select
-                        id="duration"
-                        className="border border-gray-300 rounded px-4 py-2 mt-2"
-                        onChange={(e) => setDuration(e.target.value)}
-                        value={duration}
+                    className="w-full max-w-[140px] border border-gray-300 rounded px-2 py-1.5 text-sm appearance-none bg-white"
+                    onChange={(e) => setDuration(e.target.value)}
+                    value={duration}
                     >
-                        <option value="" disabled>Select hours</option>
-                        {[1, 2, 3, 4].map((hour, index) => (
-                            <option key={index} value={hour}>
-                                {hour} hour{hour > 1 ? 's' : ''}
-                            </option>
-                        ))}
+                    <option value="" disabled>Select hours</option> 
+                    {[1, 2, 3, 4].map((hour) => (
+                        <option key={hour} value={hour} className="py-1">
+                        {hour} hour{hour > 1 ? 's' : ''}
+                        </option>
+                    ))}
                     </select>
                 </div>
+
 
                 {/* <CourtSelection 
                     availableCourts={availableCourts}

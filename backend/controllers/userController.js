@@ -173,18 +173,18 @@ const getAvailableCourts = async (req, res) => {
 // Updated API to book appointment
 // const bookAppointment = async (req, res) => {
 //     try {
-//         const { userId, locId, slotDate, startTime, endTime, duration, courtId } = req.body;
+//         const { userId, locId, slotDate, startTime, endTime, duration, courtIds } = req.body;
 //         const locData = await locationModel.findById(locId).select("-password");
-
+        
 //         if (!locData.available) {
 //             return res.json({ success: false, message: 'Location Not Available' });
 //         }
 
-//         // Check if the court is already booked for the given time slot
-//         const conflictingAppointment = await appointmentModel.findOne({
+//         // Check if any of the selected courts are already booked
+//         const conflictingAppointments = await appointmentModel.findOne({
 //             locId,
 //             slotDate,
-//             courtId,
+//             courtId: { $in: courtIds },
 //             $or: [
 //                 { startTime: { $lt: endTime, $gte: startTime } },
 //                 { endTime: { $gt: startTime, $lte: endTime } },
@@ -192,13 +192,14 @@ const getAvailableCourts = async (req, res) => {
 //             ]
 //         });
 
-//         if (conflictingAppointment) {
-//             return res.json({ success: false, message: 'Court Not Available for the selected time slot' });
+//         if (conflictingAppointments) {
+//             return res.json({ success: false, message: 'One or more courts are not available for the selected time slot' });
 //         }
 
 //         const userData = await userModel.findById(userId).select("-password");
 
-//         const appointmentData = {
+//         // Create appointments for each selected court
+//         const appointments = courtIds.map(courtId => ({
 //             userId,
 //             locId,
 //             userData,
@@ -210,17 +211,16 @@ const getAvailableCourts = async (req, res) => {
 //             courtId,
 //             slotDate,
 //             date: Date.now()
-//         };
+//         }));
 
-//         const newAppointment = new appointmentModel(appointmentData);
-//         await newAppointment.save();
-
-//         res.json({ success: true, message: 'Appointment Booked' });
+//         await appointmentModel.insertMany(appointments);
+//         res.json({ success: true, message: 'Appointments Booked Successfully' });
 //     } catch (error) {
 //         console.log(error);
 //         res.json({ success: false, message: error.message });
 //     }
 // };
+
 
 const bookAppointment = async (req, res) => {
     try {
@@ -231,7 +231,6 @@ const bookAppointment = async (req, res) => {
             return res.json({ success: false, message: 'Location Not Available' });
         }
 
-        // Check if any of the selected courts are already booked
         const conflictingAppointments = await appointmentModel.findOne({
             locId,
             slotDate,
@@ -248,8 +247,8 @@ const bookAppointment = async (req, res) => {
         }
 
         const userData = await userModel.findById(userId).select("-password");
+        const paymentDeadline = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
-        // Create appointments for each selected court
         const appointments = courtIds.map(courtId => ({
             userId,
             locId,
@@ -261,10 +260,26 @@ const bookAppointment = async (req, res) => {
             duration,
             courtId,
             slotDate,
-            date: Date.now()
+            date: Date.now(),
+            paymentDeadline
         }));
 
-        await appointmentModel.insertMany(appointments);
+        const createdAppointments = await appointmentModel.insertMany(appointments);
+
+        // Schedule automatic deletion after payment deadline
+        createdAppointments.forEach(appointment => {
+            setTimeout(async () => {
+                try {
+                    const apt = await appointmentModel.findById(appointment._id);
+                    if (apt && !apt.payment) {
+                        await appointmentModel.findByIdAndDelete(appointment._id);
+                    }
+                } catch (error) {
+                    console.error('Error in auto-deletion:', error);
+                }
+            }, 10 * 60 * 1000);
+        });
+
         res.json({ success: true, message: 'Appointments Booked Successfully' });
     } catch (error) {
         console.log(error);
@@ -272,99 +287,65 @@ const bookAppointment = async (req, res) => {
     }
 };
 
+// Add a cleanup function to periodically remove expired unpaid appointments
+const cleanupExpiredAppointments = async () => {
+    try {
+        const now = new Date();
+        await appointmentModel.deleteMany({
+            payment: false,
+            paymentDeadline: { $lt: now }
+        });
+    } catch (error) {
+        console.error('Error in cleanup:', error);
+    }
+};
 
-
-// API to book appointment 
-// const bookAppointment = async (req, res) => {
-
+// API to cancel appointment
+// const cancelAppointment = async (req, res) => {
 //     try {
 
-//         const { userId, locId, slotDate, startTime,endTime } = req.body
-//         const locData = await locationModel.findById(locId).select("-password")
+//         const { userId, appointmentId } = req.body
+//         const appointmentData = await appointmentModel.findById(appointmentId)
 
-//         if (!locData.available) {
-//             return res.json({ success: false, message: 'Location Not Available' })
+//         // verify appointment user 
+//         if (appointmentData.userId !== userId) {
+//             return res.json({ success: false, message: 'Unauthorized action' })
 //         }
 
-//         let slots_booked = locData.slots_booked
+//         await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
 
-//         // checking for slot availablity 
-//         if (slots_booked[slotDate]) {
-//             if (slots_booked[slotDate].includes(startTime,endTime)) {
-//                 return res.json({ success: false, message: 'Slot Not Available' })
-//             }
-//             else {
-//                 slots_booked[slotDate].push(startTime,endTime)
-//             }
-//         } else {
-//             slots_booked[slotDate] = []
-//             slots_booked[slotDate].push(startTime,endTime)
-//         }
+//         // releasing doctor slot 
+//         const { locId, slotDate, startTime, endTime } = appointmentData
 
-//         const userData = await userModel.findById(userId).select("-password")
+//         const locationData = await locationModel.findById(locId)
 
-//         delete locData.slots_booked
+//         let slots_booked = locationData.slots_booked
 
-//         const appointmentData = {
-//             userId,
-//             locId,
-//             userData,
-//             locData,
-//             amount: locData.fees,
-//             startTime,
-//             endTime,
-//             slotDate,
-//             date: Date.now()
-//         }
+//         slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== startTime)
 
-//         const newAppointment = new appointmentModel(appointmentData)
-//         await newAppointment.save()
-
-//         // save new slots data in locData
 //         await locationModel.findByIdAndUpdate(locId, { slots_booked })
 
-//         res.json({ success: true, message: 'Appointment Booked' })
+//         res.json({ success: true, message: 'Appointment Cancelled' })
 
 //     } catch (error) {
 //         console.log(error)
 //         res.json({ success: false, message: error.message })
 //     }
-
 // }
 
-
-// API to cancel appointment
 const cancelAppointment = async (req, res) => {
     try {
-
-        const { userId, appointmentId } = req.body
-        const appointmentData = await appointmentModel.findById(appointmentId)
-
-        // verify appointment user 
-        if (appointmentData.userId !== userId) {
-            return res.json({ success: false, message: 'Unauthorized action' })
-        }
-
-        await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
-
-        // releasing doctor slot 
-        const { locId, slotDate, startTime, endTime } = appointmentData
-
-        const locationData = await locationModel.findById(locId)
-
-        let slots_booked = locationData.slots_booked
-
-        slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== startTime)
-
-        await locationModel.findByIdAndUpdate(locId, { slots_booked })
-
-        res.json({ success: true, message: 'Appointment Cancelled' })
-
+        const { userId, appointmentId } = req.body;
+        
+        // Delete the appointment instead of marking as cancelled
+        await appointmentModel.findByIdAndDelete(appointmentId);
+        
+        res.json({ success: true, message: 'Appointment Cancelled' });
     } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        console.log(error);
+        res.json({ success: false, message: error.message });
     }
-}
+};
 
 // API to get user appointments for frontend my-appointments page
 const listAppointment = async (req, res) => {
@@ -488,6 +469,7 @@ const verifyStripe = async (req, res) => {
     }
 
 }
+setInterval(cleanupExpiredAppointments, 60 * 1000);
 
 export {
     loginUser,
