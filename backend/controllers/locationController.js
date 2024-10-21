@@ -137,9 +137,9 @@ const locationProfile = async (req, res) => {
 const updateLocationProfile = async (req, res) => {
     try {
 
-        const { locId, fees, address, available } = req.body
+        const { locId, fees, address, available, totalCourt } = req.body
 
-        await locationModel.findByIdAndUpdate(locId, { fees, address, available })
+        await locationModel.findByIdAndUpdate(locId, { fees, address, available, totalCourt})
 
         res.json({ success: true, message: 'Loaction Details Updated' })
 

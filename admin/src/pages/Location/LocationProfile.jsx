@@ -17,8 +17,10 @@ const LocationProfile = () => {
             const updateData = {
                 address: profileData.address,
                 fees: profileData.fees,
+                
                 about: profileData.about,
-                available: profileData.available
+                available: profileData.available,
+                totalCourt: profileData.totalCourt,
             }
 
             const { data } = await axios.post(backendUrl + '/api/location/update-profile', updateData, { headers: { lToken } })
@@ -59,7 +61,7 @@ const LocationProfile = () => {
 
                     <p className='flex items-center gap-2 text-3xl font-medium text-gray-700'>{profileData.name}</p>
                     <div className='flex items-center gap-2 mt-1 text-gray-600'>
-                        <p>{profileData.speciality}</p>
+                        <p>{profileData.Area}</p>
                         <button className='py-0.5 px-2 border text-xs rounded-full'>Test</button>
                     </div>
 
@@ -76,7 +78,11 @@ const LocationProfile = () => {
                     </div>
 
                     <p className='text-gray-600 font-medium mt-4'>
-                        Appointment fee: <span className='text-gray-800'>{currency} {isEdit ? <input type='number' onChange={(e) => setProfileData(prev => ({ ...prev, fees: e.target.value }))} value={profileData.fees} /> : profileData.fees}</span>
+                        Court fee: <span className='text-gray-800'>{currency} {isEdit ? <input type='number' onChange={(e) => setProfileData(prev => ({ ...prev, fees: e.target.value }))} value={profileData.fees} /> : profileData.fees}</span>
+                    </p>
+
+                    <p className='text-gray-600 font-medium mt-4'>
+                        Total Court: <span className='text-gray-800'>{isEdit ? <input type='number' onChange={(e) => setProfileData(prev => ({ ...prev, totalCourt: e.target.value }))} value={profileData.totalCourt} /> : profileData.totalCourt}</span>
                     </p>
 
                     <div className='flex gap-2 py-2'>

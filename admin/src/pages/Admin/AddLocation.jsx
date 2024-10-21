@@ -14,7 +14,8 @@ const AddLocation = () => {
     // const [experience, setExperience] = useState('1 Year')
     const [fees, setFees] = useState('')
     const [about, setAbout] = useState('')
-    const [speciality, setSpeciality] = useState('Selangor')
+    const [Area, setArea] = useState('Selangor')
+    const [totalCourt, setTotalCourt] = useState('')
     // const [degree, setDegree] = useState('')
     const [address1, setAddress1] = useState('')
     const [address2, setAddress2] = useState('')
@@ -40,7 +41,8 @@ const AddLocation = () => {
             // formData.append('experience', experience)
             formData.append('fees', Number(fees))
             formData.append('about', about)
-            formData.append('speciality', speciality)
+            formData.append('Area', Area)
+            formData.append("totalCourt", totalCourt)
             // formData.append('degree', degree)
             formData.append('address', JSON.stringify({ line1: address1, line2: address2 }))
 
@@ -58,6 +60,7 @@ const AddLocation = () => {
                 setEmail('')
                 setAddress1('')
                 setAddress2('')
+                setTotalCourt('')
                 // setDegree('')
                 setAbout('')
                 setFees('')
@@ -126,13 +129,15 @@ const AddLocation = () => {
                             <input onChange={e => setFees(e.target.value)} value={fees} className='border rounded px-3 py-2' type="number" placeholder='Court fees' required />
                         </div>
 
+
+
                     </div>
 
                     <div className='w-full lg:flex-1 flex flex-col gap-4'>
 
                         <div className='flex-1 flex flex-col gap-1'>
                             <p>Location</p>
-                            <select onChange={e => setSpeciality(e.target.value)} value={speciality} className='border rounded px-2 py-2'>
+                            <select onChange={e => setArea(e.target.value)} value={Area} className='border rounded px-2 py-2'>
                                 <option value="Selangor">Selangor</option>
                                 <option value="Kuala Lumpur">Kuala Lumpur</option>
                                 <option value="Perak">Perak</option>
@@ -143,10 +148,10 @@ const AddLocation = () => {
                         </div>
 
 
-                        {/* <div className='flex-1 flex flex-col gap-1'>
-                            <p>Degree</p>
-                            <input onChange={e => setDegree(e.target.value)} value={degree} className='border rounded px-3 py-2' type="text" placeholder='Degree' required />
-                        </div> */}
+                        <div className='flex-1 flex flex-col gap-1'>
+                            <p>Total Court</p>
+                            <input onChange={e => setTotalCourt(e.target.value)} value={totalCourt} className='border rounded px-3 py-2' type="number" placeholder='Total number of court' required />
+                        </div>
 
                         <div className='flex-1 flex flex-col gap-1'>
                             <p>Address</p>
